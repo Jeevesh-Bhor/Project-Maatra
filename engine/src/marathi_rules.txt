@@ -1,0 +1,115 @@
+# Marathi transliteration rules (Layer 1 — deterministic phonetic engine)
+#
+# Format: <latin_key> -> <devanagari_value>   (comments start with #, blank lines ignored)
+# Sections: [WORDS] exact whole-word overrides checked before compositional rules,
+#           [CONSONANTS] base glyph per consonant key (glyph already carries inherent schwa),
+#           [VOWELS_INDEPENDENT] used when a vowel has no preceding consonant,
+#           [VOWELS_MATRA] dependent vowel sign appended to a consonant (empty = schwa, no matra)
+#
+# Retroflex convention: doubling a retroflex-eligible letter selects the retroflex glyph
+# (ll->L, nn->N, tt->T, dd->D, ss->sh-retroflex) instead of a geminate conjunct. Doubling any
+# other consonant (e.g. kk, pp) falls through to the compositional engine's normal
+# consonant-then-consonant rule, which inserts a halant and forms a genuine geminate (क्क, प्प).
+
+[WORDS]
+# Manual overrides for words the dictionary can't resolve on its own (proper
+# nouns, deliberate exceptions). The general schwa/long-vowel ambiguity (e.g.
+# mala -> माला, nahi -> नाही) is now resolved by dictionary lookup instead
+# (see Transliterator::transliterate's candidate-lattice search).
+#
+# English loanwords whose standard Marathi spelling does not follow from their
+# English spelling phonetically (e.g. "january" is pronounced "jaanevaari").
+# Lookup is case-insensitive.
+
+# Gregorian months
+january -> जानेवारी
+february -> फेब्रुवारी
+march -> मार्च
+april -> एप्रिल
+may -> मे
+june -> जून
+july -> जुलै
+august -> ऑगस्ट
+september -> सप्टेंबर
+october -> ऑक्टोबर
+november -> नोव्हेंबर
+december -> डिसेंबर
+
+# Days of the week
+monday -> सोमवार
+tuesday -> मंगळवार
+wednesday -> बुधवार
+thursday -> गुरुवार
+friday -> शुक्रवार
+saturday -> शनिवार
+sunday -> रविवार
+
+[CONSONANTS]
+chh -> छ
+kh -> ख
+gh -> घ
+ch -> च
+jh -> झ
+th -> थ
+dh -> ध
+ph -> फ
+bh -> भ
+sh -> श
+ll -> ळ
+nn -> ण
+tth -> ठ
+ddh -> ढ
+tt -> ट
+dd -> ड
+ss -> ष
+k -> क
+g -> ग
+j -> ज
+t -> त
+d -> द
+n -> न
+p -> प
+b -> ब
+m -> म
+y -> य
+r -> र
+l -> ल
+v -> व
+w -> व
+s -> स
+h -> ह
+f -> फ़
+z -> ज़
+# Latin-only letters that appear in English loanwords; map to the closest sound
+# so they don't leak through as raw ASCII (e.g. "october", "quick").
+c -> क
+q -> क
+x -> क्स
+
+[VOWELS_INDEPENDENT]
+aa -> आ
+ii -> ई
+ee -> ई
+uu -> ऊ
+oo -> ऊ
+ai -> ऐ
+au -> औ
+a -> अ
+i -> इ
+u -> उ
+e -> ए
+o -> ओ
+
+[VOWELS_MATRA]
+aa -> ा
+ii -> ी
+ee -> ी
+uu -> ू
+oo -> ू
+ai -> ै
+au -> ौ
+a ->
+i -> ि
+u -> ु
+e -> े
+o -> ो

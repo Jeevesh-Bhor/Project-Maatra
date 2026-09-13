@@ -1,0 +1,32 @@
+# Build outputs
+build/
+dist/
+*.o
+*.a
+*.so
+*.so.*
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Executables
+mr-translit-cli
+*.exe
+
+# Test outputs
+Testing/
+
+# RPM build
+*.rpm
+BUILDROOT/
