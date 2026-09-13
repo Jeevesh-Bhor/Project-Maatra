@@ -1,0 +1,16 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: fcitx5-marathi-transliterate
+Source: https://github.com/Jeevesh-Bhor/Project-Maatra
+
+Files: *
+Copyright: 2026 Maatra maintainers
+License: GPL-3.0-or-later
+ This program is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later
+ version. See /usr/share/common-licenses/GPL-3 for the full text.
+
+Files: engine/src/mr_words.txt engine/src/mr_bigrams.txt
+Copyright: aspell-mr and hunspell-mr contributors; IITB-IndicMonoDoc (CFILT, IIT Bombay)
+License: GPL-2.0-or-later and CC-BY-4.0
+ See LICENSES.md for the full data-source audit.

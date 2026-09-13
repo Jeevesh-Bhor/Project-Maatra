@@ -1,0 +1,6 @@
+fcitx5-marathi-transliterate (1.0.0) unstable; urgency=medium
+
+  * Initial release: rule engine, dictionary + frequency + bigram ranking,
+    candidate popup, Devanagari digits, and per-user learning.
+
+ -- Maatra maintainers <nobody@localhost>  Sun, 13 Sep 2026 12:00:00 +0530

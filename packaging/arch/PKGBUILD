@@ -1,0 +1,31 @@
+# Maintainer: Maatra maintainers <nobody@localhost>
+pkgname=fcitx5-marathi-transliterate
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Maatra — phonetic Marathi transliteration input method for Fcitx5"
+arch=('x86_64' 'aarch64')
+url="https://github.com/Jeevesh-Bhor/Project-Maatra"
+license=('GPL-3.0-or-later')
+depends=('fcitx5' 'fcitx5-gtk' 'fcitx5-qt' 'noto-fonts')
+makedepends=('cmake' 'gtest')
+optdepends=('fcitx5-configtool: GUI to add the input method')
+source=("Project-Maatra-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cmake -S "Project-Maatra-${pkgver}" -B build \
+        -DCMAKE_BUILD_TYPE=None \
+        -DCMAKE_INSTALL_PREFIX=/usr
+    cmake --build build
+}
+
+check() {
+    ctest --test-dir build --output-on-failure
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 "Project-Maatra-${pkgver}/README.md"  "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 "Project-Maatra-${pkgver}/INSTALL.md" "$pkgdir/usr/share/doc/$pkgname/INSTALL.md"
+    install -Dm644 "Project-Maatra-${pkgver}/LICENSES.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSES.md"
+}

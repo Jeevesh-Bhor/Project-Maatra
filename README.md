@@ -36,13 +36,70 @@ ever leaves your machine.
 - **Months, days, capitals.** `january` → जानेवारी, `Mumbai` → मुंबई.
 - **One shortcut.** Ctrl+Space (or Super+Space) flips between Marathi and
   your normal keyboard in any app — GTK, Qt, Electron, terminal.
+- **Runs everywhere Fcitx5 does.** Native packages for Fedora, RHEL, openSUSE,
+  Debian, Ubuntu and Arch families — see [Supported distributions](#supported-distributions).
+
+## Supported distributions
+
+Maatra runs on any Linux distribution that ships Fcitx5 (5.0 or newer), and is
+shipped as a native package for every major family. Each package is built and
+unit-tested in a clean container of its target distro before release.
+
+| Distribution | Also covers | Package | Install |
+|---|---|---|---|
+| **Fedora** 43+ | Nobara, Ultramarine | `.rpm` | `sudo dnf install ./fcitx5-marathi-transliterate-*.fc44.x86_64.rpm` |
+| **RHEL** 9+ | AlmaLinux, Rocky, CentOS Stream (EPEL enabled) | `.rpm` | `sudo dnf install ./fcitx5-marathi-transliterate-*.el9.x86_64.rpm` |
+| **openSUSE** | Tumbleweed, Leap, Slowroll | `.rpm` | `sudo zypper install ./fcitx5-marathi-transliterate-*.x86_64.rpm` |
+| **Debian** 12+ | Devuan, MX Linux, Kali | `.deb` | `sudo apt install ./fcitx5-marathi-transliterate_*_amd64.deb` |
+| **Ubuntu** 24.04+ | Mint, Pop!_OS, elementary, Zorin, KDE neon, Kubuntu | `.deb` | `sudo apt install ./fcitx5-marathi-transliterate_*_amd64.deb` |
+| **Arch** | Manjaro, EndeavourOS, CachyOS, Garuda | `.pkg.tar.zst` | `sudo pacman -U ./fcitx5-marathi-transliterate-*-x86_64.pkg.tar.zst` |
+| Gentoo, NixOS, Void, Alpine, Solus | — | build from source | see below |
+
+| Works with | |
+|---|---|
+| **Desktops** | GNOME, KDE Plasma, XFCE, Cinnamon, MATE, Budgie, LXQt, Sway, Hyprland, i3 |
+| **Display servers** | Wayland and X11 |
+| **App toolkits** | GTK 3/4, Qt 5/6, Electron/Chromium, terminals, Wayland-native apps |
+| **Architectures** | x86_64 (prebuilt); aarch64 builds from the same sources |
+
+**Not** available as Flatpak, Snap or AppImage: those are sandboxed *app*
+formats, and an input method is a plugin that must load inside the system's
+Fcitx5 process. A native package is the only way to install one.
+
+### Why there is one package per distro, not one per format
+
+The *file format* is shared within a family — Debian and Ubuntu both use the
+same `.deb`; Fedora, RHEL and openSUSE all use the same `.rpm`. What makes a
+package "for Ubuntu" or "for openSUSE" is what was baked in when it was built:
+
+- **Library versions it was compiled against.** The Debian 12 `.deb` is built
+  on Fcitx5 5.0.21 / glibc 2.36 and declares those as minimums, so it also
+  installs on newer Ubuntu; the Ubuntu 24.04 `.deb` is built on Fcitx5 5.1.7 /
+  glibc 2.38 and will *not* install on Debian 12. Newer can run older, not the
+  reverse.
+- **What the dependencies are called.** Fedora's GTK/Qt bridges are
+  `fcitx5-gtk` and `fcitx5-qt`; openSUSE splits them into `fcitx5-gtk3`,
+  `fcitx5-gtk4`, `fcitx5-qt6`. The Devanagari font is
+  `google-noto-sans-devanagari-vf-fonts` on Fedora, `…-fonts` on RHEL and
+  `noto-sans-devanagari-fonts` on openSUSE. Fedora needs a separate
+  `fcitx5-autostart`; the others bundle autostart into `fcitx5`. A Fedora RPM
+  on openSUSE fails with "nothing provides fcitx5-gtk" — not because the
+  binary wouldn't run, but because that name doesn't exist there.
+
+So Debian/Ubuntu differ only in version floors (one `debian/` directory, no
+conditionals), while Fedora/RHEL/openSUSE differ in dependency names (one
+`.spec` with `%if` blocks per distro). Pick the package built for your distro
+and the package manager resolves everything correctly.
 
 ## Install
 
-**Fedora users:** install the `.rpm` and follow the four short steps in
-[INSTALL.md](INSTALL.md) (install → log out/in → add the input method → type).
+Grab the package for your distro from the table above and follow the four
+short steps in [INSTALL.md](INSTALL.md): install → log out and back in → add
+the input method → type. Debian/Ubuntu users run one extra command
+(`im-config -n fcitx5`) so the session starts Fcitx5.
 
-**Building from source:**
+**Building from source** (Fedora shown; Debian/Arch dependency names are in
+INSTALL.md §C):
 
 ```bash
 sudo dnf install fcitx5 fcitx5-devel fcitx5-configtool fcitx5-gtk fcitx5-qt \
@@ -149,9 +206,10 @@ User Interface, or see INSTALL.md for the config-file version.
 ## Project layout
 
 ```
-engine/    core transliterator (C++20, no Fcitx5 dependency) + CLI + tests
-fcitx5/    the Fcitx5 addon, input-method manifests, and the popup theme
-*.spec     Fedora RPM packaging
+engine/       core transliterator (C++20, no Fcitx5 dependency) + CLI + tests
+fcitx5/       the Fcitx5 addon, input-method manifests, and the popup theme
+packaging/    rpm/ spec (Fedora, RHEL, openSUSE), arch/ PKGBUILD, build-all.sh
+debian/       Debian/Ubuntu packaging
 ```
 
 The engine can be exercised without a GUI:

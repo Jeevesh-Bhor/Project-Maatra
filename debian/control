@@ -1,0 +1,29 @@
+Source: fcitx5-marathi-transliterate
+Section: utils
+Priority: optional
+Maintainer: Maatra maintainers <nobody@localhost>
+Build-Depends: debhelper-compat (= 13),
+               cmake,
+               g++,
+               libfcitx5core-dev,
+               libfcitx5config-dev,
+               libfcitx5utils-dev,
+               libgtest-dev
+Standards-Version: 4.6.2
+Homepage: https://github.com/Jeevesh-Bhor/Project-Maatra
+Rules-Requires-Root: no
+
+Package: fcitx5-marathi-transliterate
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         fcitx5,
+         fcitx5-frontend-gtk3,
+         fcitx5-frontend-gtk4 | fcitx5-frontend-gtk3,
+         fcitx5-frontend-qt5 | fcitx5-frontend-qt6,
+         fonts-noto-core
+Recommends: fcitx5-config-qt, im-config
+Description: Maatra - phonetic Marathi transliteration input method for Fcitx5
+ Type Marathi phonetically on a QWERTY keyboard and get Devanagari, with a
+ ranked candidate popup, sentence-context disambiguation (bigram language
+ model), Devanagari digits, and per-user learning. Fully offline.
