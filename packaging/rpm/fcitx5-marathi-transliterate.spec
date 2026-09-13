@@ -4,22 +4,39 @@ Release:        1%{?dist}
 Summary:        Maatra — phonetic Marathi transliteration input method for Fcitx5
 
 License:        GPL-3.0-or-later
-Source0:        %{name}-%{version}.tar.gz
+URL:            https://github.com/Jeevesh-Bhor/Project-Maatra
+Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz#/Project-Maatra-%{version}.tar.gz
 
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
 BuildRequires:  fcitx5-devel
+%if 0%{?suse_version}
+BuildRequires:  gtest
+%else
 BuildRequires:  gtest-devel
+%endif
 
 Requires:       fcitx5
+# Toolkit integrations so GTK and Qt apps see the IME, and a Devanagari font
+# for the candidate popup. Package names differ per distro family.
+%if 0%{?suse_version}
+Requires:       fcitx5-gtk3
+Requires:       fcitx5-gtk4
+Requires:       fcitx5-qt6
+Requires:       noto-sans-devanagari-fonts
+%else
+# Fedora / RHEL (EPEL)
+Requires:       fcitx5-gtk
+Requires:       fcitx5-qt
+%if 0%{?fedora}
 # Starts fcitx5 with the GUI session; without it the IME is not running after
 # login and Marathi typing silently does nothing.
 Requires:       fcitx5-autostart
-# Toolkit integrations so GTK and Qt apps see the IME.
-Requires:       fcitx5-gtk
-Requires:       fcitx5-qt
-# Devanagari rendering for the candidate popup.
 Requires:       google-noto-sans-devanagari-vf-fonts
+%else
+Requires:       google-noto-sans-devanagari-fonts
+%endif
+%endif
 # Lets the user add the input method from a GUI.
 Recommends:     fcitx5-configtool
 
@@ -30,7 +47,7 @@ Devanagari, with a ranked candidate popup, sentence-context disambiguation
 offline.
 
 %prep
-%autosetup
+%autosetup -n Project-Maatra-%{version}
 
 %build
 %cmake
@@ -57,4 +74,4 @@ offline.
 %changelog
 * Sun Sep 13 2026 Maatra maintainers <nobody@localhost> - 1.0.0-1
 - Initial release: rule engine, dictionary + frequency + bigram ranking,
-  candidate popup, and per-user learning.
+  candidate popup, Devanagari digits, and per-user learning.

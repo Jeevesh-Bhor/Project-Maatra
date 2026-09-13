@@ -10,8 +10,17 @@ target_link_libraries(marathitranslit PRIVATE
     marathi-translit-engine
 )
 
-install(TARGETS marathitranslit DESTINATION "${CMAKE_INSTALL_LIBDIR}/fcitx5")
-install(FILES data/marathitranslit.conf DESTINATION "${CMAKE_INSTALL_DATADIR}/fcitx5/addon")
-install(FILES data/mr-translit.conf DESTINATION "${CMAKE_INSTALL_DATADIR}/fcitx5/inputmethod")
+# Fcitx5 tells us where this distro keeps addons and data (lib64 on Fedora,
+# lib/<triplet> on Debian, ...). Fall back to GNUInstallDirs if unset.
+if(NOT FCITX_INSTALL_ADDONDIR)
+    set(FCITX_INSTALL_ADDONDIR "${CMAKE_INSTALL_LIBDIR}/fcitx5")
+endif()
+if(NOT FCITX_INSTALL_PKGDATADIR)
+    set(FCITX_INSTALL_PKGDATADIR "${CMAKE_INSTALL_DATADIR}/fcitx5")
+endif()
+
+install(TARGETS marathitranslit DESTINATION "${FCITX_INSTALL_ADDONDIR}")
+install(FILES data/marathitranslit.conf DESTINATION "${FCITX_INSTALL_PKGDATADIR}/addon")
+install(FILES data/mr-translit.conf DESTINATION "${FCITX_INSTALL_PKGDATADIR}/inputmethod")
 # Candidate-popup theme (selectable in fcitx5-configtool > Addons > Classic UI).
-install(DIRECTORY data/themes/maatra-dark DESTINATION "${CMAKE_INSTALL_DATADIR}/fcitx5/themes")
+install(DIRECTORY data/themes/maatra-dark DESTINATION "${FCITX_INSTALL_PKGDATADIR}/themes")
