@@ -1,19 +1,51 @@
-# Data source licensing audit
+# Licenses
 
-## Marathi dictionary (`engine/src/mr_words.txt` — words)
+## Maatra
 
-- **aspell-mr** (GNU Aspell Marathi Dictionary Package), Fedora package `aspell-mr`. License: GPL-2.0-or-later (per `/usr/share/licenses/aspell-mr/COPYING` at install time). Word list extracted via `aspell -d mr dump master`.
-- **hunspell-mr** (Marathi hunspell dictionaries), Fedora package `hunspell-mr`. Base word forms extracted from `/usr/share/hunspell/mr_IN.dic` (affix flags stripped). License: per Fedora packaging (MPL/GPL/LGPL tri-license typical of hunspell dictionaries — verify `rpm -q --license hunspell-mr` before redistribution).
+Copyright © 2026 the Maatra contributors.
 
-Merged and deduplicated: 100,917 unique Devanagari words.
+The Maatra source code — the transliteration engine (`engine/`), the Fcitx5
+addon and theme (`fcitx5/`), and the packaging — is licensed under the
+**GNU General Public License, version 3 or (at your option) any later
+version**. The full text is in [LICENSE](LICENSE).
 
-## Word frequency counts (`engine/src/mr_words.txt` — frequency column)
+## Third-party data shipped with Maatra
 
-- **cfilt/IITB-IndicMonoDoc** dataset on Hugging Face (`https://huggingface.co/datasets/cfilt/IITB-IndicMonoDoc`), Marathi (`mr`) split. License: **CC-BY-4.0**. Attribution required on redistribution.
-- The full Marathi split was used (~19GB, all 15 shards), giving corpus-frequency coverage for 91.6% of the dictionary. Frequency of 0 means "known dictionary word, not seen in this sample" (not "invalid word").
+Maatra includes a Marathi dictionary and a statistical language model built
+from the sources below. They are redistributed under their own licenses, all
+of which are compatible with GPL-3.0-or-later. Their notices must be kept
+with any redistribution of Maatra or of the data files.
 
-## Word bigram model (`engine/src/mr_bigrams.txt`)
+### Marathi word list — `engine/src/mr_words.txt` (word column)
 
-- Word-pair (bigram) co-occurrence counts computed from the same IITB-IndicMonoDoc sample (CC-BY-4.0). Restricted to pairs whose second word is "confusable" (collides with another dictionary word under the engine's toggle rules), kept when count >= 20. ~1.96M pairs. Used for sentence-context reranking (Layer 2 language model), e.g. मला कळत vs काळात.
+Merged and deduplicated from two dictionaries (100,917 unique words):
 
-Sourced 2026-09-13 for the fcitx5-marathi-transliterate Phase 2 dictionary/frequency layer.
+- **GNU Aspell Marathi Word List** (`aspell-mr`)
+  Copyright © 2005 Swapnil Hajare and Swapnil Sant, janabhaaratii, NCST.
+  Licensed under the GNU General Public License, version 2 or (at your option)
+  any later version, per the upstream `Copyright` file. (Fedora's package
+  metadata records it as GPL-2.0-only; the upstream notice's "or any later
+  version" clause governs, making it compatible with GPL-3.)
+  Extracted with `aspell -d mr dump master`.
+
+- **Marathi Hunspell dictionary** (`hunspell-mr`, `mr_IN.dic`)
+  Licensed under the GNU General Public License, version 3 or (at your option)
+  any later version (per `rpm -q --qf '%{LICENSE}' hunspell-mr`).
+  Base word forms extracted with affix flags stripped.
+
+### Word frequencies and bigram model — `engine/src/mr_words.txt` (count column), `engine/src/mr_bigrams.txt`
+
+Derived from the Marathi split of **IITB-IndicMonoDoc**, published by CFILT,
+Indian Institute of Technology Bombay:
+<https://huggingface.co/datasets/cfilt/IITB-IndicMonoDoc>
+
+Licensed under **Creative Commons Attribution 4.0 International
+(CC-BY-4.0)**: <https://creativecommons.org/licenses/by/4.0/>.
+Attribution is required on redistribution; this notice satisfies it.
+
+The files contain only aggregate statistics computed from the corpus — per-word
+occurrence counts and word-pair co-occurrence counts (pairs kept when the
+second word is ambiguous under the engine's rules and the count is ≥ 20;
+~1.96 M pairs). No text from the corpus is included.
+
+Statistics computed 2026-09-13 from the complete Marathi split (~19 GB).

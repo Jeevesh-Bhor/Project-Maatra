@@ -27,5 +27,6 @@ package() {
     DESTDIR="$pkgdir" cmake --install build
     install -Dm644 "Project-Maatra-${pkgver}/README.md"  "$pkgdir/usr/share/doc/$pkgname/README.md"
     install -Dm644 "Project-Maatra-${pkgver}/INSTALL.md" "$pkgdir/usr/share/doc/$pkgname/INSTALL.md"
+    install -Dm644 "Project-Maatra-${pkgver}/LICENSE"    "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
     install -Dm644 "Project-Maatra-${pkgver}/LICENSES.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSES.md"
 }

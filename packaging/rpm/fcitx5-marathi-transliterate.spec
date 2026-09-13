@@ -60,7 +60,7 @@ offline.
 %cmake_install
 
 %files
-%license LICENSES.md
+%license LICENSE LICENSES.md
 %doc README.md INSTALL.md
 %{_libdir}/fcitx5/libmarathitranslit.so
 %{_datadir}/fcitx5/addon/marathitranslit.conf
