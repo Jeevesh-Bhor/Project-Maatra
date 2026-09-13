@@ -10,7 +10,17 @@ License: GPL-3.0-or-later
  Foundation, either version 3 of the License, or (at your option) any later
  version. See /usr/share/common-licenses/GPL-3 for the full text.
 
-Files: engine/src/mr_words.txt engine/src/mr_bigrams.txt
-Copyright: aspell-mr and hunspell-mr contributors; IITB-IndicMonoDoc (CFILT, IIT Bombay)
-License: GPL-2.0-or-later and CC-BY-4.0
- See LICENSES.md for the full data-source audit.
+Files: engine/src/mr_words.txt
+Copyright: 2005 Swapnil Hajare, Swapnil Sant (aspell-mr word list)
+           hunspell-mr contributors
+           CFILT, IIT Bombay (IITB-IndicMonoDoc frequency counts)
+License: GPL-2.0-or-later and GPL-3.0-or-later and CC-BY-4.0
+ Word list merged from aspell-mr (GPL-2.0-or-later) and hunspell-mr
+ (GPL-3.0-or-later); frequency column derived from IITB-IndicMonoDoc
+ (CC-BY-4.0). See LICENSES.md.
+
+Files: engine/src/mr_bigrams.txt
+Copyright: CFILT, IIT Bombay (IITB-IndicMonoDoc)
+License: CC-BY-4.0
+ Aggregate word-pair counts derived from IITB-IndicMonoDoc,
+ https://huggingface.co/datasets/cfilt/IITB-IndicMonoDoc . See LICENSES.md.
