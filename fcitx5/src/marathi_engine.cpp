@@ -93,19 +93,23 @@ void MarathiEngine::keyEvent(const InputMethodEntry&, KeyEvent& event) {
     if (composing) {
         auto candidateList = ic->inputPanel().candidateList();
 
-        if (key.check(FcitxKey_Down)) {
+        // Down / Tab move the highlight forward, Up / Shift+Tab move it back
+        // (Fcitx5's own default bindings). Tab is deliberately swallowed here:
+        // letting it through would commit the word and then move keyboard
+        // focus out of the text field. Space / Enter commit the highlighted
+        // candidate, which is the top pick unless the user moved it.
+        const bool shiftTab = key.check(FcitxKey_Tab, KeyState::Shift) ||
+                              key.sym() == FcitxKey_ISO_Left_Tab;
+        const bool next = key.check(FcitxKey_Down) || key.check(FcitxKey_Tab);
+        const bool prev = key.check(FcitxKey_Up) || shiftTab;
+        if (next || prev) {
             if (auto* movable = dynamic_cast<CommonCandidateList*>(candidateList.get())) {
-                movable->nextCandidate();
-                ic->updatePreedit();
-                ic->updateUserInterface(UserInterfaceComponent::InputPanel);
-            }
-            event.filterAndAccept();
-            return;
-        }
-        if (key.check(FcitxKey_Up)) {
-            if (auto* movable = dynamic_cast<CommonCandidateList*>(candidateList.get())) {
-                movable->prevCandidate();
-                ic->updatePreedit();
+                if (next) {
+                    movable->nextCandidate();
+                } else {
+                    movable->prevCandidate();
+                }
+                setPreedit(ic, highlightedText(ic));
                 ic->updateUserInterface(UserInterfaceComponent::InputPanel);
             }
             event.filterAndAccept();
@@ -203,14 +207,17 @@ void MarathiEngine::updateUI(InputContext* ic) {
     ic->inputPanel().setCandidateList(std::move(list));
 
     // Preedit shows the currently highlighted candidate (top by default).
-    std::string preeditText = candidates.empty()
-                                  ? transliterator_.transliterate(buffer_, lastCommittedWord_)
-                                  : candidates.front();
-    Text preedit(preeditText, TextFormatFlag::Underline);
-    preedit.setCursor(static_cast<int>(preeditText.size()));
+    setPreedit(ic, candidates.empty()
+                       ? transliterator_.transliterate(buffer_, lastCommittedWord_)
+                       : candidates.front());
+    ic->updateUserInterface(UserInterfaceComponent::InputPanel);
+}
+
+void MarathiEngine::setPreedit(InputContext* ic, const std::string& text) {
+    Text preedit(text, TextFormatFlag::Underline);
+    preedit.setCursor(static_cast<int>(text.size()));
     ic->inputPanel().setClientPreedit(preedit);
     ic->updatePreedit();
-    ic->updateUserInterface(UserInterfaceComponent::InputPanel);
 }
 
 void MarathiEngine::commitSelected(InputContext* ic) {

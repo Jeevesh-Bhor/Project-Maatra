@@ -1,6 +1,6 @@
 # Maintainer: Maatra maintainers <nobody@localhost>
 pkgname=fcitx5-marathi-transliterate
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="Maatra — phonetic Marathi transliteration input method for Fcitx5"
 arch=('x86_64' 'aarch64')

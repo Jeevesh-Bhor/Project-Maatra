@@ -1,5 +1,5 @@
 Name:           fcitx5-marathi-transliterate
-Version:        1.0.0
+Version:        1.0.1
 Release:        1%{?dist}
 Summary:        Maatra — phonetic Marathi transliteration input method for Fcitx5
 
@@ -72,6 +72,15 @@ offline.
 %{_datadir}/fcitx5-marathitranslit/mr_bigrams.txt
 
 %changelog
+* Fri Sep 18 2026 Maatra maintainers <nobody@localhost> - 1.0.1-1
+- Bug fix: Tab no longer leaks through to the application while composing
+  a word, which previously moved keyboard focus out of the text field
+  instead of just being ignored. Tab / Shift+Tab now cycle the candidate
+  popup highlight, matching Fcitx5's own default bindings and Down/Up.
+- Bug fix: the inline preedit text now follows the highlighted candidate
+  when it is moved with Up/Down/Tab/Shift+Tab, instead of always showing
+  the top candidate regardless of what was highlighted.
+
 * Sun Sep 13 2026 Maatra maintainers <nobody@localhost> - 1.0.0-1
 - Initial release: rule engine, dictionary + frequency + bigram ranking,
   candidate popup, Devanagari digits, and per-user learning.
