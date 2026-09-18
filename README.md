@@ -145,7 +145,7 @@ Doubling any *other* consonant produces a real geminate (`kka` → क्क).
 |------------------------------|------------------------------------------------------------|
 | `Ctrl+Space` / `Super+Space` | Switch Marathi ↔ normal keyboard (Super+Space: see INSTALL.md) |
 | `1` – `9`                    | Pick that candidate                                        |
-| `↑` / `↓`                    | Move the highlight                                         |
+| `↑` / `↓`, `Tab` / `Shift+Tab` | Move the highlight (Tab never leaves the text field mid-word) |
 | `Space`                      | Commit the highlighted candidate and a space               |
 | `Enter`                      | Commit the highlighted candidate, no space                 |
 | `Esc`                        | Commit the raw Latin as typed (English words, URLs, names) |
