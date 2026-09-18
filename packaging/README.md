@@ -24,7 +24,7 @@ packaging/build-all.sh deb arch       # a subset
 ```
 
 The tarball is taken from the working tree, so uncommitted changes are
-included. For a release, tag first (`git tag v1.0.0`) — the spec and PKGBUILD
+included. For a release, tag first (`git tag v1.0.1`) — the spec and PKGBUILD
 download `https://github.com/Jeevesh-Bhor/Project-Maatra/archive/refs/tags/v<version>.tar.gz`,
 so once the tag is pushed, `rpmbuild` and `makepkg` work standalone on any
 machine. Attach the files from `dist/*/` to the GitHub Release.
@@ -39,8 +39,8 @@ the Fedora recipe against an `almalinux:9` image with EPEL enabled, or
 # Fedora / RHEL / openSUSE
 rpmdev-setuptree
 cp packaging/rpm/*.spec ~/rpmbuild/SPECS/
-tar --transform 's,^,Project-Maatra-1.0.0/,' --exclude=build --exclude=dist --exclude=.git \
-    -czf ~/rpmbuild/SOURCES/Project-Maatra-1.0.0.tar.gz .
+tar --transform 's,^,Project-Maatra-1.0.1/,' --exclude=build --exclude=dist --exclude=.git \
+    -czf ~/rpmbuild/SOURCES/Project-Maatra-1.0.1.tar.gz .
 rpmbuild -bb ~/rpmbuild/SPECS/fcitx5-marathi-transliterate.spec
 
 # Debian / Ubuntu

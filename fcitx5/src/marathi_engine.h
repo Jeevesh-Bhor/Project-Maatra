@@ -24,6 +24,8 @@ public:
 private:
     // Rebuild the preedit + candidate popup from the current Latin buffer.
     void updateUI(InputContext* ic);
+    // Push `text` to the application as the underlined inline preedit.
+    void setPreedit(InputContext* ic, const std::string& text);
     // Commit whatever candidate is currently highlighted (or the top one).
     void commitSelected(InputContext* ic);
     void clearState(InputContext* ic);
