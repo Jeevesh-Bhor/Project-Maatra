@@ -34,7 +34,7 @@ run() { # run <target> <image> <script>
 }
 
 build_fedora() { run fedora registry.fedoraproject.org/fedora:44 '
-    dnf -y -q install rpm-build rpmdevtools cmake gcc-c++ fcitx5-devel gtest-devel
+    dnf -y -q install rpm-build rpmdevtools cmake gcc-c++ fcitx5-devel pango-devel gtest-devel
     rpmdev-setuptree
     cp /work/$TARDIR.tar.gz ~/rpmbuild/SOURCES/
     cp /work/$TARDIR/packaging/rpm/$NAME.spec ~/rpmbuild/SPECS/
@@ -44,7 +44,7 @@ build_fedora() { run fedora registry.fedoraproject.org/fedora:44 '
 '; }
 
 build_suse() { run suse registry.opensuse.org/opensuse/tumbleweed:latest '
-    zypper -q -n install rpm-build cmake gcc-c++ fcitx5-devel gtest tar gzip
+    zypper -q -n install rpm-build cmake gcc-c++ fcitx5-devel pango-devel gtest tar gzip
     mkdir -p ~/rpmbuild/{SOURCES,SPECS}
     cp /work/$TARDIR.tar.gz ~/rpmbuild/SOURCES/
     cp /work/$TARDIR/packaging/rpm/$NAME.spec ~/rpmbuild/SPECS/
@@ -57,7 +57,7 @@ deb_script='
     export DEBIAN_FRONTEND=noninteractive
     apt-get -qq update
     apt-get -qq install -y --no-install-recommends build-essential debhelper cmake \
-        libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libgtest-dev >/dev/null
+        libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libpango1.0-dev libgtest-dev >/dev/null
     cp -r /work/$TARDIR /build && cd /build
     dpkg-buildpackage -us -uc -b 2>&1 | grep -E "tests passed|dpkg-deb: building|error" 
     cp ../${NAME}_${VERSION}_*.deb /out/

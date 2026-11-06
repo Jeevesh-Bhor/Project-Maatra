@@ -6,6 +6,7 @@ Build-Depends: debhelper-compat (= 13),
                cmake,
                g++,
                libfcitx5core-dev,
+               libpango1.0-dev,
                libfcitx5config-dev,
                libfcitx5utils-dev,
                libgtest-dev

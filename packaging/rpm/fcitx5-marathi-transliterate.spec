@@ -10,6 +10,7 @@ Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz#/Project-Maatra-%{ve
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
 BuildRequires:  fcitx5-devel
+BuildRequires:  pkgconfig(pangocairo)
 %if 0%{?suse_version}
 BuildRequires:  gtest
 %else

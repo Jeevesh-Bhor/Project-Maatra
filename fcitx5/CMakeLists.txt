@@ -1,5 +1,7 @@
 find_package(Fcitx5Core REQUIRED)
 find_package(Fcitx5Utils REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PangoCairo REQUIRED IMPORTED_TARGET pangocairo)
 
 add_library(marathitranslit MODULE
     src/marathi_engine.cpp
@@ -7,6 +9,7 @@ add_library(marathitranslit MODULE
 )
 target_link_libraries(marathitranslit PRIVATE
     Fcitx5::Core
+    PkgConfig::PangoCairo
     marathi-translit-engine
 )
 

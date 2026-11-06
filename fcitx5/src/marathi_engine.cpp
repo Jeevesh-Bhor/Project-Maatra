@@ -7,7 +7,15 @@
 #include <fcitx/text.h>
 #include <fcitx/userinterface.h>
 
+#include <pango/pangocairo.h>
+
+#include <fcitx-utils/standardpath.h>
+
+#include <algorithm>
+#include <cmath>
+#include <fstream>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace fcitx {
@@ -17,8 +25,10 @@ namespace {
 // A candidate that commits its own Devanagari text back through the engine.
 class MarathiCandidate : public CandidateWord {
 public:
-    MarathiCandidate(MarathiEngine* engine, std::string text)
-        : CandidateWord(Text(text)), engine_(engine), value_(std::move(text)) {}
+    MarathiCandidate(MarathiEngine* engine, std::string text, const std::string& padding)
+        : CandidateWord(Text(text)), engine_(engine), value_(std::move(text)) {
+        setComment(Text(padding));
+    }
 
     void select(InputContext* ic) const override {
         engine_->commitCandidate(ic, value_);
@@ -29,7 +39,141 @@ private:
     std::string value_;
 };
 
-constexpr int kPageSize = 9;
+// A blank, unnumbered row that keeps the popup's height when words run out.
+class FillerCandidate : public CandidateWord {
+public:
+    FillerCandidate() { setCustomLabel(Text("")); }
+    void select(InputContext*) const override {}
+};
+
+// The popup is exactly as tall as its rows and as wide as its widest row, and
+// Fcitx5 has no setting for either. ScrollingCandidateList fixes the height by
+// always reporting kVisibleRows rows. WidthPadder fixes the width.
+constexpr int kVisibleRows = 5;
+
+// Row width, in em, available for a word. Fits 99.99% of running text and about
+// 99% of dictionary words; a wider word still stretches the popup.
+constexpr double kWordWidthEm = 6.0;
+
+// Pads each row to the same width with invisible spaces in its comment, which
+// is display-only. The theme must set CommentTextSizeFactor=100, as the padding
+// is measured at the candidate font size.
+class WidthPadder {
+public:
+    WidthPadder() {
+        context_ = pango_font_map_create_context(pango_cairo_font_map_get_default());
+        PangoFontDescription* font = pango_font_description_from_string(popupFont().c_str());
+        pango_context_set_font_description(context_, font);
+        pango_font_description_free(font);
+        layout_ = pango_layout_new(context_);
+        rowWidth_ = kWordWidthEm * measure("\u2003");
+        spaceWidth_ = measure(kSpace);
+    }
+    ~WidthPadder() {
+        g_object_unref(layout_);
+        g_object_unref(context_);
+    }
+    WidthPadder(const WidthPadder&) = delete;
+    WidthPadder& operator=(const WidthPadder&) = delete;
+
+    std::string paddingFor(const std::string& word) {
+        if (spaceWidth_ <= 0) return {};
+        int count = static_cast<int>(std::lround((rowWidth_ - measure(word)) / spaceWidth_));
+        std::string padding;
+        for (int i = 0; i < count; ++i) padding += kSpace;
+        return padding;
+    }
+
+private:
+    static constexpr const char* kSpace = "\u200A"; // hair space: fine-grained
+
+    int measure(const std::string& text) {
+        pango_layout_set_text(layout_, text.c_str(), static_cast<int>(text.size()));
+        int width = 0;
+        pango_layout_get_size(layout_, &width, nullptr);
+        return width;
+    }
+
+    // The font the popup draws with, from Classic UI's config.
+    static std::string popupFont() {
+        std::ifstream config(StandardPath::global().userDirectory(StandardPath::Type::PkgConfig) +
+                             "/conf/classicui.conf");
+        std::string line;
+        while (std::getline(config, line)) {
+            if (line.rfind("Font=", 0) != 0) continue;
+            std::string font = line.substr(5);
+            font.erase(std::remove(font.begin(), font.end(), '"'), font.end());
+            return font;
+        }
+        return "Sans 10"; // Classic UI's default
+    }
+
+    PangoContext* context_ = nullptr;
+    PangoLayout* layout_ = nullptr;
+    double rowWidth_ = 0;
+    double spaceWidth_ = 0;
+};
+
+// A fixed window sliding down a single list, one row at a time. Fcitx5's own
+// list can only page. Keyboard moves wrap around; the mouse wheel scrolls.
+class ScrollingCandidateList : public CandidateList,
+                               public PageableCandidateList,
+                               public CursorMovableCandidateList {
+public:
+    ScrollingCandidateList(MarathiEngine* engine, const std::vector<std::string>& words) {
+        setPageable(this);
+        setCursorMovable(this);
+        static WidthPadder padder;
+        for (const auto& word : words) {
+            words_.push_back(
+                std::make_unique<MarathiCandidate>(engine, word, padder.paddingFor(word)));
+        }
+        for (int i = 1; i <= kVisibleRows; ++i) {
+            labels_.emplace_back(std::to_string(i) + ". ");
+        }
+    }
+
+    const Text& label(int idx) const override { return labels_.at(idx); }
+    const CandidateWord& candidate(int idx) const override {
+        int row = offset_ + idx;
+        if (row < total()) return *words_[row];
+        return blank_;
+    }
+    int size() const override { return kVisibleRows; }
+    int cursorIndex() const override { return cursor_ - offset_; }
+    CandidateLayoutHint layoutHint() const override { return CandidateLayoutHint::Vertical; }
+
+    bool hasPrev() const override { return offset_ > 0; }
+    bool hasNext() const override { return offset_ + kVisibleRows < total(); }
+    void prev() override {
+        if (!hasPrev()) return;
+        --offset_;
+        cursor_ = std::min(cursor_, offset_ + kVisibleRows - 1);
+    }
+    void next() override {
+        if (!hasNext()) return;
+        ++offset_;
+        cursor_ = std::max(cursor_, offset_);
+    }
+    bool usedNextBefore() const override { return false; }
+
+    void prevCandidate() override { moveCursor(cursor_ == 0 ? total() - 1 : cursor_ - 1); }
+    void nextCandidate() override { moveCursor(cursor_ + 1 == total() ? 0 : cursor_ + 1); }
+
+private:
+    int total() const { return static_cast<int>(words_.size()); }
+    void moveCursor(int cursor) {
+        cursor_ = cursor;
+        if (cursor_ < offset_) offset_ = cursor_;
+        if (cursor_ >= offset_ + kVisibleRows) offset_ = cursor_ - kVisibleRows + 1;
+    }
+
+    std::vector<std::unique_ptr<MarathiCandidate>> words_;
+    std::vector<Text> labels_;
+    FillerCandidate blank_;
+    int offset_ = 0;
+    int cursor_ = 0;
+};
 
 } // namespace
 
@@ -103,7 +247,7 @@ void MarathiEngine::keyEvent(const InputMethodEntry&, KeyEvent& event) {
         const bool next = key.check(FcitxKey_Down) || key.check(FcitxKey_Tab);
         const bool prev = key.check(FcitxKey_Up) || shiftTab;
         if (next || prev) {
-            if (auto* movable = dynamic_cast<CommonCandidateList*>(candidateList.get())) {
+            if (auto* movable = candidateList ? candidateList->toCursorMovable() : nullptr) {
                 if (next) {
                     movable->nextCandidate();
                 } else {
@@ -116,10 +260,10 @@ void MarathiEngine::keyEvent(const InputMethodEntry&, KeyEvent& event) {
             return;
         }
 
-        // Number keys 1-9 select the corresponding candidate on the page.
+        // Number keys select the corresponding visible row.
         if (key.isDigit() && candidateList) {
             int idx = key.digit() - 1; // '1' -> 0
-            if (idx >= 0 && idx < candidateList->size()) {
+            if (idx >= 0 && idx < kVisibleRows) {
                 candidateList->candidate(idx).select(ic);
                 event.filterAndAccept();
                 return;
@@ -134,8 +278,10 @@ void MarathiEngine::keyEvent(const InputMethodEntry&, KeyEvent& event) {
         }
 
         if (key.check(FcitxKey_space)) {
-            commitSelected(ic);
-            ic->commitString(" ");
+            // One commit, not two: Chromium-based browsers can keep only the
+            // last commit of a key press, which would lose the word and leave
+            // just the space.
+            commitSelected(ic, " ");
             event.filterAndAccept();
             return;
         }
@@ -194,17 +340,8 @@ void MarathiEngine::updateUI(InputContext* ic) {
     // Float the user's previously-chosen readings for this Latin key to the top.
     learn_.rerank(buffer_, candidates);
 
-    auto list = std::make_unique<CommonCandidateList>();
-    list->setPageSize(kPageSize);
-    list->setLayoutHint(CandidateLayoutHint::Vertical);
-    list->setSelectionKey(Key::keyListFromString("1 2 3 4 5 6 7 8 9"));
-    for (const auto& c : candidates) {
-        list->append<MarathiCandidate>(this, c);
-    }
-    if (!candidates.empty()) {
-        list->setGlobalCursorIndex(0);
-    }
-    ic->inputPanel().setCandidateList(std::move(list));
+    topCandidate_ = candidates.empty() ? std::string() : candidates.front();
+    ic->inputPanel().setCandidateList(std::make_unique<ScrollingCandidateList>(this, candidates));
 
     // Preedit shows the currently highlighted candidate (top by default).
     setPreedit(ic, candidates.empty()
@@ -220,20 +357,18 @@ void MarathiEngine::setPreedit(InputContext* ic, const std::string& text) {
     ic->updatePreedit();
 }
 
-void MarathiEngine::commitSelected(InputContext* ic) {
-    commitCandidate(ic, highlightedText(ic));
+void MarathiEngine::commitSelected(InputContext* ic, const std::string& suffix) {
+    commitCandidate(ic, highlightedText(ic), suffix);
 }
 
-void MarathiEngine::commitCandidate(InputContext* ic, const std::string& text) {
+void MarathiEngine::commitCandidate(InputContext* ic, const std::string& text,
+                                    const std::string& suffix) {
     // If the user committed something other than the current top candidate,
     // that's an explicit correction — remember it so it ranks first next time.
-    if (!buffer_.empty()) {
-        auto cl = ic->inputPanel().candidateList();
-        if (cl && cl->size() > 0 && cl->candidate(0).text().toString() != text) {
-            learn_.record(buffer_, text);
-        }
+    if (!buffer_.empty() && !topCandidate_.empty() && text != topCandidate_) {
+        learn_.record(buffer_, text);
     }
-    ic->commitString(text);
+    ic->commitString(text + suffix);
     lastCommittedWord_ = text; // becomes bigram context for the next word
     clearState(ic);
 }

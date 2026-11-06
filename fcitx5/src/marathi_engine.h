@@ -19,7 +19,9 @@ public:
     void reset(const InputMethodEntry& entry, InputContextEvent& event) override;
 
     // Commit a specific candidate string, then clear composing state.
-    void commitCandidate(InputContext* ic, const std::string& text);
+    // `suffix` is committed along with `text` but isn't part of the word.
+    void commitCandidate(InputContext* ic, const std::string& text,
+                         const std::string& suffix = "");
 
 private:
     // Rebuild the preedit + candidate popup from the current Latin buffer.
@@ -27,7 +29,7 @@ private:
     // Push `text` to the application as the underlined inline preedit.
     void setPreedit(InputContext* ic, const std::string& text);
     // Commit whatever candidate is currently highlighted (or the top one).
-    void commitSelected(InputContext* ic);
+    void commitSelected(InputContext* ic, const std::string& suffix = "");
     void clearState(InputContext* ic);
     [[nodiscard]] std::string highlightedText(InputContext* ic) const;
 
@@ -35,6 +37,7 @@ private:
     marathi::Transliterator transliterator_;
     LearnStore learn_;               // per-user learned candidate choices
     std::string buffer_;             // accumulated Latin input for the current word
+    std::string topCandidate_;       // best reading, to tell when the user picked another
     std::string lastCommittedWord_;  // previous Devanagari word, for bigram context
     bool passthrough_ = false;       // global Latin passthrough mode (Ctrl+Space)
 };

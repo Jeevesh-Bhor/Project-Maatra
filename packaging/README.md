@@ -44,7 +44,7 @@ tar --transform 's,^,Project-Maatra-1.0.1/,' --exclude=build --exclude=dist --ex
 rpmbuild -bb ~/rpmbuild/SPECS/fcitx5-marathi-transliterate.spec
 
 # Debian / Ubuntu
-sudo apt install build-essential debhelper cmake libfcitx5core-dev \
+sudo apt install build-essential debhelper cmake libfcitx5core-dev libpango1.0-dev \
                  libfcitx5config-dev libfcitx5utils-dev libgtest-dev
 dpkg-buildpackage -us -uc -b          # .deb lands in the parent directory
 
@@ -57,7 +57,7 @@ cd packaging/arch && makepkg -si
 Build dependencies (Fedora names; Debian/Arch equivalents are above):
 
 ```bash
-sudo dnf install fcitx5 fcitx5-devel fcitx5-configtool fcitx5-gtk fcitx5-qt \
+sudo dnf install fcitx5 fcitx5-devel pango-devel fcitx5-configtool fcitx5-gtk fcitx5-qt \
                  fcitx5-autostart gtest-devel cmake gcc-c++
 ```
 
