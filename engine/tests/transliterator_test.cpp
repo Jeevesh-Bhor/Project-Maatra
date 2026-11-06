@@ -66,7 +66,10 @@ TEST_F(TransliteratorTest, RetroflexLa) {
 }
 
 TEST_F(TransliteratorTest, RetroflexNa) {
-    EXPECT_EQ(t.transliterate("nann"), "नण");
+    // Doubling still forces the retroflex, as a selectable reading, even for a
+    // non-word: "nn" now reads as a geminate first.
+    auto cands = t.generateCandidates("nann");
+    EXPECT_NE(std::find(cands.begin(), cands.end(), "नण"), cands.end());
 }
 
 TEST_F(TransliteratorTest, NasalConjunctVsAnusvaraSpellingVariant) {
@@ -187,6 +190,104 @@ TEST_F(TransliteratorTest, GeminateConjunctFallsThroughForNonRetroflexLetters) {
     // 'kk' is not a retroflex-eligible pair, so it should fall through to the
     // ordinary consonant+consonant halant rule instead of a special glyph.
     EXPECT_EQ(t.transliterate("kka"), "क्क");
+}
+
+TEST_F(TransliteratorTest, DoubledLettersReadAsGeminates) {
+    EXPECT_EQ(t.transliterate("uttar"), "उत्तर");
+    EXPECT_EQ(t.transliterate("shuddha"), "शुद्ध");
+    EXPECT_EQ(t.transliterate("prasiddha"), "प्रसिद्ध");
+}
+
+TEST_F(TransliteratorTest, DoubledLettersOfferBothReadings) {
+    // पत्ता (address) and पट्टा (belt) are both real words typed the same way.
+    auto cands = t.generateCandidates("patta");
+    EXPECT_NE(std::find(cands.begin(), cands.end(), "पत्ता"), cands.end());
+    EXPECT_NE(std::find(cands.begin(), cands.end(), "पट्टा"), cands.end());
+}
+
+TEST_F(TransliteratorTest, AnusvaraBeforeNa) {
+    EXPECT_EQ(t.transliterate("tyanna"), "त्यांना");
+    EXPECT_EQ(t.transliterate("tyanni"), "त्यांनी");
+    EXPECT_EQ(t.transliterate("yani"), "यांनी");
+}
+
+TEST_F(TransliteratorTest, FinalAnusvaraIsOffered) {
+    auto cands = t.generateCandidates("kela");
+    EXPECT_EQ(cands.front(), "केला");
+    EXPECT_NE(std::find(cands.begin(), cands.end(), "केलं"), cands.end());
+}
+
+TEST_F(TransliteratorTest, ZAndFMeanPlainLetters) {
+    EXPECT_EQ(t.transliterate("zala"), "झाला");
+    EXPECT_EQ(t.transliterate("fakt"), "फक्त");
+    EXPECT_EQ(t.transliterate("roz"), "रोज");
+}
+
+TEST_F(TransliteratorTest, LettersThatHadNoKey) {
+    EXPECT_EQ(t.transliterate("gyan"), "ज्ञान");
+    EXPECT_EQ(t.transliterate("dnyan"), "ज्ञान");
+    EXPECT_EQ(t.transliterate("mrutyu"), "मृत्यू");
+    EXPECT_EQ(t.transliterate("rushi"), "ऋषी");
+    EXPECT_EQ(t.transliterate("karanarya"), "करणाऱ्या");
+    EXPECT_EQ(t.transliterate("dukh"), "दुःख");
+    EXPECT_EQ(t.transliterate("bank"), "बँक");
+}
+
+TEST_F(TransliteratorTest, LooseReadingsDoNotBeatDirectOnes) {
+    EXPECT_EQ(t.transliterate("asa"), "असा");
+    EXPECT_EQ(t.transliterate("che"), "चे");
+    EXPECT_EQ(t.transliterate("khara"), "खरा");
+}
+
+TEST_F(TransliteratorTest, DoubledAspiratedRetroflex) {
+    EXPECT_EQ(t.transliterate("vitthal"), "विठ्ठल");
+    EXPECT_EQ(t.transliterate("vithal"), "विठ्ठल");
+    EXPECT_EQ(t.transliterate("atthavis"), "अठ्ठावीस");
+    EXPECT_EQ(t.transliterate("athavis"), "अठ्ठावीस");
+}
+
+TEST_F(TransliteratorTest, LongWordsAreNotGivenUpOn) {
+    EXPECT_EQ(t.transliterate("mukhyamantryanna"), "मुख्यमंत्र्यांना");
+    EXPECT_EQ(t.transliterate("sanskrutimadhye"), "संस्कृतीमध्ये");
+    EXPECT_EQ(t.transliterate("sangitalan"), "सांगितलं");
+}
+
+TEST_F(TransliteratorTest, LoanwordVowels) {
+    // Both spellings are in use; the more common one ranks first.
+    auto mobile = t.generateCandidates("mobail");
+    EXPECT_EQ(mobile.front(), "मोबाईल");
+    EXPECT_NE(std::find(mobile.begin(), mobile.end(), "मोबाइल"), mobile.end());
+    auto download = t.generateCandidates("daunlod");
+    EXPECT_NE(std::find(download.begin(), download.end(), "डाउनलोड"), download.end());
+    EXPECT_EQ(t.transliterate("tomato"), "टोमॅटो");
+}
+
+TEST_F(TransliteratorTest, AnusvaraWithTheNasalLeftOut) {
+    EXPECT_EQ(t.transliterate("kiva"), "किंवा");
+    EXPECT_EQ(t.transliterate("mubai"), "मुंबई");
+    EXPECT_EQ(t.transliterate("sagitale"), "सांगितले");
+    EXPECT_EQ(t.transliterate("dogar"), "डोंगर");
+    EXPECT_EQ(t.transliterate("natar"), "नंतर");
+}
+
+TEST_F(TransliteratorTest, AnusvaraOnAFinalConsonant) {
+    for (auto [typed, word] : {std::pair{"hot", "होतं"}, {"moth", "मोठं"}, {"sagal", "सगळं"}}) {
+        auto cands = t.generateCandidates(typed);
+        EXPECT_NE(std::find(cands.begin(), cands.end(), word), cands.end()) << typed;
+    }
+}
+
+TEST_F(TransliteratorTest, LeftOutAnusvaraIsOfferedNotForced) {
+    // Both are real words; the reading that matches what was typed stays first.
+    auto cands = t.generateCandidates("tyachya");
+    EXPECT_EQ(cands.front(), "त्याच्या");
+    EXPECT_NE(std::find(cands.begin(), cands.end(), "त्यांच्या"), cands.end());
+}
+
+TEST_F(TransliteratorTest, WordOverrideKeepsOtherReadings) {
+    auto cands = t.generateCandidates("june");
+    EXPECT_EQ(cands.front(), "जून");
+    EXPECT_NE(std::find(cands.begin(), cands.end(), "जुने"), cands.end());
 }
 
 } // namespace

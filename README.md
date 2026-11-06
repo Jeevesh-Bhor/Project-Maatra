@@ -121,23 +121,30 @@ Just type. If the first result isn't what you meant, the popup has the rest.
 | `karto`       | करतो         | schwa deletion                             |
 | `neelesh`     | नीलेश        | `ee` / `oo` are long ई / ऊ                 |
 
-**Forcing a retroflex.** If the engine guesses dental where you wanted
-retroflex, double the letter:
+**Doubled letters.** A doubled letter reads as a geminate first, and the
+retroflex is offered alongside it. When both are real words, the more common
+one comes first and the other is in the candidate list. The retroflex is always
+in the list, even when it isn't a dictionary word, so doubling can still force one:
 
-| Type | Get | Type | Get |
-|------|-----|------|-----|
-| `t`  | त   | `tt`  | ट  |
-| `th` | थ   | `tth` | ठ  |
-| `d`  | द   | `dd`  | ड  |
-| `dh` | ध   | `ddh` | ढ  |
-| `n`  | न   | `nn`  | ण  |
-| `l`  | ल   | `ll`  | ळ  |
-| `s`  | स   | `ss`  | ष  |
+| Type  | First | Also offered | Example              |
+|-------|-------|--------------|----------------------|
+| `tt`  | त्त    | ट, ट्ट        | `uttar` → उत्तर       |
+| `tth` | त्थ    | ठ, ट्ठ        | `kutthe` → कुठे       |
+| `dd`  | द्द    | ड, ड्ड        |                      |
+| `ddh` | द्ध    | ढ, ड्ढ        | `shuddha` → शुद्ध     |
+| `nn`  | न्न    | ण, ण्ण, ंन    | `tyanna` → त्यांना     |
+| `ll`  | ल्ल    | ळ            | `ullekh` → उल्लेख     |
+| `ss`  | स्स    | ष            |                      |
 
 Doubling any *other* consonant produces a real geminate (`kka` → क्क).
 
-**Other useful spellings:** `sh` → श, `ch` → च, `chh` → छ, `f` → फ़, `z` → ज़,
-`x` → क्स, `ai` → ऐ/ै, `au` → औ/ौ.
+**Other useful spellings:** `sh` → श, `ch` → च, `chh` → छ, `f` → फ, `z` or `zh` → झ,
+`x` → क्स or क्ष, `gy`/`dny` → ज्ञ, `ru`/`ri` → ृ or ऋ (`krushna`, `rushi`),
+`ry` → र्य or ऱ्य, `ai` → ऐ/ै, `au` → औ/ौ.
+
+The nukta spellings फ़ and ज़ are still offered when they are dictionary words.
+Rarer readings, such as `s` → श, rank below the direct reading unless they are far
+more common.
 
 ## Keys
 

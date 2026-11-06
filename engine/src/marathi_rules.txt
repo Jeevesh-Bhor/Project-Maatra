@@ -5,11 +5,16 @@
 #           [CONSONANTS] base glyph per consonant key (glyph already carries inherent schwa),
 #           [VOWELS_INDEPENDENT] used when a vowel has no preceding consonant,
 #           [VOWELS_MATRA] dependent vowel sign appended to a consonant (empty = schwa, no matra)
+#           [ALTERNATES] extra readings of a consonant key, one per line (a key may repeat);
+#                        only readings that are dictionary words are offered
+#           [LOOSE_ALTERNATES] same, for readings that stretch what was typed: they rank
+#                        below a direct reading unless far more frequent
+#           [VOWEL_ALTERNATES] same for vowels: <key> -> <independent glyph> <matra>
 #
-# Retroflex convention: doubling a retroflex-eligible letter selects the retroflex glyph
-# (ll->L, nn->N, tt->T, dd->D, ss->sh-retroflex) instead of a geminate conjunct. Doubling any
-# other consonant (e.g. kk, pp) falls through to the compositional engine's normal
-# consonant-then-consonant rule, which inserts a halant and forms a genuine geminate (क्क, प्प).
+# Doubled letters: tt, dd, nn, ll, ss (and ddh, tth) read as a geminate first (उत्तर, शुद्ध) because
+# that is how people actually type them. Their first [ALTERNATES] entry must stay the retroflex
+# (ट, ड, ण, ळ, ष, ढ, ठ): it is always offered, so doubling can still force one. Doubling any other
+# consonant (e.g. kk, pp) falls through to the normal consonant-then-consonant rule (क्क, प्प).
 
 [WORDS]
 # Manual overrides for words the dictionary can't resolve on its own (proper
@@ -55,13 +60,23 @@ dh -> ध
 ph -> फ
 bh -> भ
 sh -> श
-ll -> ळ
-nn -> ण
-tth -> ठ
-ddh -> ढ
-tt -> ट
-dd -> ड
-ss -> ष
+ll -> ल्ल
+nn -> न्न
+tth -> त्थ
+ddh -> द्ध
+tt -> त्त
+dd -> द्द
+ss -> स्स
+cch -> च्च
+zh -> झ
+# ज्ञ is typed by its sound; gy stays ग्य first (भाग्य), with ज्ञ as an alternate.
+dny -> ज्ञ
+gny -> ज्ञ
+jny -> ज्ञ
+gy -> ग्य
+# Multi-letter so that eyelash ऱ can be offered in [ALTERNATES].
+ry -> र्य
+rh -> र्ह
 k -> क
 g -> ग
 j -> ज
@@ -78,8 +93,8 @@ v -> व
 w -> व
 s -> स
 h -> ह
-f -> फ़
-z -> ज़
+f -> फ
+z -> झ
 # Latin-only letters that appear in English loanwords; map to the closest sound
 # so they don't leak through as raw ASCII (e.g. "october", "quick").
 c -> क
@@ -113,3 +128,86 @@ i -> ि
 u -> ु
 e -> े
 o -> ो
+
+[ALTERNATES]
+# Doubled letters: retroflex first (see the header), then other real readings.
+tt -> ट
+tt -> ट्ट
+dd -> ड
+dd -> ड्ड
+nn -> ण
+nn -> ण्ण
+nn -> ंन
+nn -> ं
+ll -> ळ
+ss -> ष
+tth -> ठ
+tth -> ठ्ठ
+tth -> ट्ठ
+ddh -> ढ
+ddh -> ड्ढ
+# ज्ञ against ग्य; the -ण्य- forms are verb endings (sangnyat -> सांगण्यात).
+gy -> ज्ञ
+gy -> गय
+gny -> गण्य
+dny -> डण्य
+dny -> दण्य
+jny -> जण्य
+ry -> ऱ्य
+ry -> रय
+rh -> ऱ्ह
+rh -> रह
+chh -> च्छ
+cch -> च्छ
+# Visarga is usually dropped in typing (dukh -> दुःख, far more common than दुख).
+kh -> ःख
+
+[LOOSE_ALTERNATES]
+# A doubled letter typed for a single one, mostly English loans (pass -> पास).
+tt -> त
+dd -> द
+nn -> न
+ll -> ल
+ss -> स
+# Anusvara before न, typed with a single n (tyana -> त्यांना).
+n -> ंन
+# Chandrabindu in English loans (bank -> बँक).
+n -> ँ
+# ज is also pronounced z (roz -> रोज); ज़ and फ़ stay reachable as nukta spellings.
+z -> ज
+z -> ज़
+f -> फ़
+# Doubled letters are often typed single (vithal -> विठ्ठल, dili -> दिल्ली).
+th -> ठ्ठ
+t -> त्त
+t -> ट्ट
+d -> द्द
+d -> ड्ड
+n -> न्न
+l -> ल्ल
+s -> स्स
+k -> क्क
+p -> प्प
+m -> म्म
+b -> ब्ब
+g -> ग्ग
+j -> ज्ज
+ch -> च्च
+# ये after ध, typed without the y (madhe -> मध्ये).
+dh -> ध्य
+# Spellings a single key can't otherwise reach.
+s -> श
+ch -> छ
+x -> क्ष
+dh -> द्ध
+# Visarga: punah -> पुनः, antahkaran -> अंतःकरण.
+h -> ः
+
+[VOWEL_ALTERNATES]
+# English-loan vowels, always loose: doktar -> डॉक्टर, bat -> बॅट.
+o -> ऑ ॉ
+au -> ऑ ॉ
+a -> ॲ ॅ
+# Two vowels in loans, with a short second one: mobail -> मोबाइल, daunlod -> डाउनलोड.
+ai -> आइ ाइ
+au -> आउ ाउ

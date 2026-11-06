@@ -62,13 +62,23 @@ private:
         // vowel in casual typing ("karto") as implicitly present ("करतो").
         // Ignored if asAnusvara is also set (anusvara wins).
         bool insertSchwaAfter = false;
+        // When true on an "r" token, assemble() folds this r and the vowel after
+        // it into vocalic r: ृ after a consonant (krushna -> कृष्ण), or
+        // independent ऋ at word start (rushi -> ऋषी).
+        bool asVocalicR = false;
     };
 
     std::map<std::string, std::string> words_;             // whole-word overrides
     std::map<std::string, std::string> consonants_;         // latin -> base glyph (schwa included)
     std::map<std::string, std::string> vowelsIndependent_;  // latin -> independent vowel glyph
     std::map<std::string, std::string> vowelsMatra_;        // latin -> dependent matra (may be empty)
+    // One-to-many readings from [ALTERNATES] and [LOOSE_ALTERNATES]: latin
+    // consonant key -> (extra glyph, is loose).
+    std::map<std::string, std::vector<std::pair<std::string, bool>>> consonantAlts_;
+    // From [VOWEL_ALTERNATES]: latin vowel key -> (independent glyph, matra) pairs.
+    std::map<std::string, std::vector<std::pair<std::string, std::string>>> vowelAlts_;
     std::unordered_map<std::string, uint64_t> dictionary_;  // real Devanagari word -> corpus frequency
+    std::vector<std::string> sortedWords_;                  // dictionary keys, for prefix checks
     // Bigram counts keyed by "prevWord\x1fcandidate" -> co-occurrence count.
     std::unordered_map<std::string, uint64_t> bigrams_;
 
@@ -82,7 +92,11 @@ private:
     [[nodiscard]] uint64_t bigramCount(const std::string& prev, const std::string& cand) const;
 
     std::vector<Token> tokenize(std::string_view latin) const;
-    std::string assemble(const std::vector<Token>& tokens) const;
+    // Renders the first `count` tokens (all of them by default). A shorter render
+    // is always a prefix of the full one, which is what the search prunes on.
+    std::string assemble(const std::vector<Token>& tokens,
+                         size_t count = static_cast<size_t>(-1)) const;
+    [[nodiscard]] bool isDictionaryPrefix(const std::string& prefix) const;
 
     // "a"->"aa", "i"->"ii", "u"->"uu"; empty if key isn't a togglable short vowel.
     static std::string longVowelAltKey(const std::string& key);
