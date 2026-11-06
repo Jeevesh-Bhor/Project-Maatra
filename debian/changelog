@@ -1,3 +1,16 @@
+fcitx5-marathi-transliterate (1.0.2) unstable; urgency=medium
+
+  * Many more words can be typed, and ambiguous typing now offers every real
+    reading: doubled letters, ज्ञ, ृ/ऋ, ऱ्य, ः, ॅ/ॉ, ठ्ठ and ं, including ं
+    with no nasal typed.
+  * z and f now give झ and फ; long words are no longer given up on.
+  * Bug fix: pressing Space no longer loses the word in Chromium-based
+    browsers.
+  * The candidate popup is now a fixed-size, compact, rounded list showing
+    five words, which scrolls instead of paging.
+
+ -- Maatra maintainers <nobody@localhost>  Fri, 06 Nov 2026 12:00:00 +0530
+
 fcitx5-marathi-transliterate (1.0.1) unstable; urgency=medium
 
   * Bug fix: Tab no longer leaks through to the application while composing

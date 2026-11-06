@@ -21,6 +21,7 @@ mkdir -p "$WORK"
 echo "== source tarball $TARDIR.tar.gz"
 rm -rf "$WORK/$TARDIR"; mkdir -p "$WORK/$TARDIR"
 tar -C "$ROOT" --exclude=./build --exclude='./build-*' --exclude=./dist --exclude=./.git \
+    --exclude=./research_notes --exclude=./reports \
     -cf - . | tar -C "$WORK/$TARDIR" -xf -
 tar -C "$WORK" -czf "$WORK/$TARDIR.tar.gz" "$TARDIR"
 
@@ -28,7 +29,7 @@ run() { # run <target> <image> <script>
     local target=$1 image=$2 script=$3 out="$ROOT/dist/$1"
     mkdir -p "$out"
     echo "== $target ($image)"
-    $PODMAN run --rm -e VERSION="$VERSION" -e NAME="$NAME" -e TARDIR="$TARDIR" \
+    $PODMAN run --rm -e VERSION="$VERSION" -e NAME="$NAME" -e TARDIR="$TARDIR" -e TARGET="$target" \
         -v "$WORK:/work:ro,Z" -v "$out:/out:Z" "$image" bash -euo pipefail -c "$script"
     ls -1 "$out"
 }
@@ -60,7 +61,7 @@ deb_script='
         libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libpango1.0-dev libgtest-dev >/dev/null
     cp -r /work/$TARDIR /build && cd /build
     dpkg-buildpackage -us -uc -b 2>&1 | grep -E "tests passed|dpkg-deb: building|error" 
-    cp ../${NAME}_${VERSION}_*.deb /out/
+    cp ../${NAME}_${VERSION}_*.deb /out/${NAME}_${VERSION}_${TARGET}_amd64.deb
     dpkg-deb -I /out/${NAME}_${VERSION}_*.deb | grep -E "Depends|Version"
     dpkg-deb -c /out/${NAME}_${VERSION}_*.deb | grep -E "\.so$|addon/|inputmethod/"
 '
@@ -74,7 +75,7 @@ build_arch() { run arch docker.io/library/archlinux:base-devel '
     cp /work/$TARDIR.tar.gz /home/builder/pkg/
     chown -R builder /home/builder/pkg
     cd /home/builder/pkg && su builder -c "makepkg -f --noconfirm --nodeps 2>&1 | grep -E \"tests passed|Finished making|ERROR\""
-    cp /home/builder/pkg/$NAME-$VERSION-*.pkg.tar.zst /out/
+    cp /home/builder/pkg/$NAME-$VERSION-1-x86_64.pkg.tar.zst /out/$NAME-$VERSION-1.x86_64.pkg.tar.zst
     tar -tf /out/$NAME-$VERSION-*.pkg.tar.zst | grep -E "\.so$|addon/|inputmethod/"
 '; }
 

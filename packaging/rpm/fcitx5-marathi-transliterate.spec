@@ -1,5 +1,5 @@
 Name:           fcitx5-marathi-transliterate
-Version:        1.0.1
+Version:        1.0.2
 Release:        1%{?dist}
 Summary:        Maatra — phonetic Marathi transliteration input method for Fcitx5
 
@@ -73,6 +73,16 @@ offline.
 %{_datadir}/fcitx5-marathitranslit/mr_bigrams.txt
 
 %changelog
+* Fri Nov 06 2026 Maatra maintainers <nobody@localhost> - 1.0.2-1
+- Many more words can be typed, and ambiguous typing now offers every real
+  reading: doubled letters, ज्ञ, ृ/ऋ, ऱ्य, ः, ॅ/ॉ, ठ्ठ and ं, including ं
+  with no nasal typed.
+- z and f now give झ and फ; long words are no longer given up on.
+- Bug fix: pressing Space no longer loses the word in Chromium-based
+  browsers.
+- The candidate popup is now a fixed-size, compact, rounded list showing
+  five words, which scrolls instead of paging.
+
 * Fri Sep 18 2026 Maatra maintainers <nobody@localhost> - 1.0.1-1
 - Bug fix: Tab no longer leaks through to the application while composing
   a word, which previously moved keyboard focus out of the text field
