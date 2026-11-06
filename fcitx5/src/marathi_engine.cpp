@@ -27,7 +27,7 @@ class MarathiCandidate : public CandidateWord {
 public:
     MarathiCandidate(MarathiEngine* engine, std::string text, const std::string& padding)
         : CandidateWord(Text(text)), engine_(engine), value_(std::move(text)) {
-        setComment(Text(padding));
+        setPadding(this, padding);
     }
 
     void select(InputContext* ic) const override {
@@ -35,6 +35,15 @@ public:
     }
 
 private:
+    // Older Fcitx5, as on Debian 12, has no setComment. There the popup just
+    // keeps a variable width. A template, so the check compiles on either.
+    template <typename Candidate>
+    static void setPadding(Candidate* candidate, const std::string& padding) {
+        if constexpr (requires { candidate->setComment(Text(padding)); }) {
+            candidate->setComment(Text(padding));
+        }
+    }
+
     MarathiEngine* engine_;
     std::string value_;
 };
